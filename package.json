@@ -1,0 +1,19 @@
+{
+  "name": "web_crawler",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node ./bin/www"
+  },
+  "author": "Yifan Gu",
+  "license": "ISC",
+  "dependencies": {
+    "async": "^2.1.4",
+    "cheerio": "^0.22.0",
+    "express": "^4.14.0",
+    "mongodb": "^2.2.16",
+    "request": "^2.79.0"
+  }
+}
