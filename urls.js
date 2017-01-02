@@ -1,11 +1,80 @@
+let request = require('request');
+
+function randomUA(){
+  let userAgents = [
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/55.0.2883.95 Safari/537.36',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_6) AppleWebKit/602.1.50 (KHTML, like Gecko) Version/10.0 Safari/602.1.50',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:44.0) Gecko/20100101 Firefox/44.0',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:44.0) Gecko/20100101 Firefox/45.0',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:44.0) Gecko/20100101 Firefox/48.0',
+    'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.11; rv:50.0) Gecko/20100101 Firefox/50.0'
+  ];
+
+  return userAgents[Math.floor(Math.random() * userAgents.length)];
+}
+
+//到时候要多放点mid
+function randomMid(){
+  let mids = [13, 2346236, 23462, 113455, 1678990, 848436, 9751];
+  
+  return mids[Math.floor(Math.random() * mids.length)];
+}
+
 module.exports.user = {
-  info: function(){
+  info: function(mid){
     /*
-    *POST
-    *Content-Type: application/x-www-form-urlencoded
-    *Referer: http://space.bilibili.com/873981/
+    POST
+    http://space.bilibili.com/ajax/member/GetInfo
+    {
+      mid:
+      _:
+    }
+    Referer: http://space.bilibili.com/873981/
     */
-    return 'http://space.bilibili.com/ajax/member/GetInfo';
+    return {
+      url: 'http://space.bilibili.com/ajax/member/GetInfo',
+      form: {
+        mid: mid,
+        _:new Date().getTime()
+      },
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_11_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/52.0.2743.116 Safari/537.36',
+        'X-Requested-With': 'XMLHttpRequest',
+        'Referer': 'http://space.bilibili.com/873981/',
+        'Origin': 'http://space.bilibili.com',
+        'Host': 'space.bilibili.com',
+        'AlexaToolbar-ALX_NS_PH': 'AlexaToolbar/alx-4.0',
+        'Accept-Language': 'zh-CN,zh;q=0.8,en;q=0.6,ja;q=0.4',
+        'Accept': 'application/json, text/javascript, */*; q=0.01',
+      }
+    };
+  },
+  infoWithProxy: function(mid = randomMid(), proxy){
+    proxy = proxy.split('|');
+    let ipAddress = proxy[0],
+        port = proxy[1];
+    let options = {
+      url     : 'http://space.bilibili.com/ajax/member/GetInfo',
+      headers: {
+        'User-Agent': randomUA(),
+        'X-Requested-With': 'XMLHttpRequest',
+        'Referer': `http://space.bilibili.com/${randomMid()}/`,
+        'Origin': 'http://space.bilibili.com',
+        'Host': 'space.bilibili.com',
+        'AlexaToolbar-ALX_NS_PH': 'AlexaToolbar/alx-4.0',
+        'Accept-Language': 'zh-CN,zh;q=0.8,en;q=0.6,ja;q=0.4',
+        'Accept': 'application/json, text/javascript, */*; q=0.01',
+        'X-Real-IP': ipAddress,
+        'X-Forearded-For': ipAddress
+      },
+      form: {
+        mid: mid,
+        _:new Date().getTime()
+      },
+      timeout: 5000
+    };
+    let proxiedRequest = request.defaults({'proxy': `http://${ipAddress}:${port}`});
+    return {options, proxiedRequest};
   },
   fans: function({mid, page, _=new Date().getTime()}){
     //http://space.bilibili.com/ajax/friend/GetFansList?mid=188294&page=2&_=1482709739003
@@ -25,7 +94,7 @@ module.exports.user = {
   submitVideos: function({mid, tid=0, pagesize=25,  _=new Date().getTime()}){
     //http://space.bilibili.com/ajax/member/getSubmitVideos?mid=188294&tid=0&pagesize=25&_=1482701504892
     if(!mid) return;
-    return `http://space.bilibili.com/ajax/member/getSubmitVideos?mid=${mid}&tid=${tid}&pagesize=${pagesize}&_=${_}`
+    return `http://space.bilibili.com/ajax/member/getSubmitVideos?mid=${mid}&tid=${tid}&pagesize=${pagesize}&_=${_}`;
   }
 };
 
@@ -34,6 +103,23 @@ module.exports.video = {
     //http://api.bilibili.com/archive_rank/getarchiverankbypartion?callback=jQuery17206259586882507797_1482699525366&type=jsonp&tid=30&pn=2&_=1482699544074
     if(!tid || !pn) return; //以后这种错误也可记录到日志
     return `http://api.bilibili.com/archive_rank/getarchiverankbypartion?callback=${callback}&type=${type}&tid=${tid}&pn=${pn}&_=${_}`;
+  }
+};
+
+module.exports.proxyWebs = {
+  incloak: function(maxtime = 2000, type = 'h', anon, start = 0, end){
+    if(!end) return;
+
+    return {
+      url: `https://incloak.com/proxy-list/?maxtime=${maxtime}&type=${type}&start={start}&end=${end}` + (anon ? `&anon=${anon}` : ``) + `#list`,
+      headers: {
+        'User-Agent': randomUA(),
+        'X-Requested-With': 'XMLHttpRequest',
+        'AlexaToolbar-ALX_NS_PH': 'AlexaToolbar/alx-4.0',
+        'Accept-Language': 'zh-CN,zh;q=0.8,en;q=0.6,ja;q=0.4',
+        'Accept': 'application/json, text/javascript, */*; q=0.01',
+      }
+    };
   }
 };
 

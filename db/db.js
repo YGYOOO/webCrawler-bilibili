@@ -13,12 +13,12 @@ const createVocaloidVideoToDb = function(vocaloidVideo, callback){
       });
     }
     else{
-      db.collection('vocaloidVideo').updateOne({_id: ObjectId(result._id)}, vocaloidVideo, function(err, result){
+      db.collection('vocaloidVideo').updateOne({_id: ObjectId(result._id)}, vocaloidVideo, function(){
         callback(false, false, true);
       });
     }
   });
-}
+};
 
 // const createVideoToDb = function(video, callback){
 //   db.collection('video').findOne({aid: video.aid}, function(err, result){
@@ -37,17 +37,17 @@ const createVocaloidVideoToDb = function(vocaloidVideo, callback){
 //   });
 // }
 
-const createVideoToDb = function(video, callback){
+const createVideoInfoToDb = function(video, callback){
   db.collection('video').insertOne(video, function(err, result){
     callback(err, result);
   });
-}
+};
 
 const createCrawlerLogToDb = function(data, callback){
   db.collection('crawlerLog').insertOne(data, function(err, result){
     callback(err, result);
   });
-}
+};
 
 module.exports.createVocaloidVideo = function(vocaloidVideo, callback){
   createVocaloidVideoToDb(vocaloidVideo, function(err, result, updated){
@@ -64,10 +64,10 @@ module.exports.createVocaloidVideo = function(vocaloidVideo, callback){
       callback(null, false);
     }
   });
-}
+};
 
-module.exports.createVideo = function(video, callback){
-  createVideoToDb(video, function(err, result, updated){
+module.exports.createVideoInfo = function(video, callback){
+  createVideoInfoToDb(video, function(err, result, updated){
     if(err){
       callback(err, false);
     }
@@ -81,7 +81,19 @@ module.exports.createVideo = function(video, callback){
       callback(null, false);
     }
   });
-}
+};
+
+module.exports.createUserInfo = function(user, callback){
+  db.collection('user').insertOne(user, function(err, result){
+    callback(err, result);
+  });
+};
+
+module.exports.createUserRelation = function(user, callback){
+  db.collection('userRelation').insertOne(user, function(err, result){
+    callback(err, result);
+  });
+};
 
 module.exports.createCrawlerLog = function(data, callback){
   createCrawlerLogToDb(data, function(err, result){
@@ -95,7 +107,13 @@ module.exports.createCrawlerLog = function(data, callback){
       callback(null, false);
     }
   });
-}
+};
+
+module.exports.createDisabledProxy = function(proxy, callback){
+    db.collection('disabledProxy').insertOne(proxy, function(err, result){
+    callback(err, result);
+  });
+};
 
 module.exports.buildConnectionToDb = function(callback){
   mongodb.connect(URL, function(err, dbObj){
@@ -107,8 +125,8 @@ module.exports.buildConnectionToDb = function(callback){
       callback();
     }
   });
-}
+};
 
 module.exports.closeConnectionToDb = function(){
   db.close();
-}
+};
